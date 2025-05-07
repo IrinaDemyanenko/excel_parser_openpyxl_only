@@ -26,7 +26,7 @@ def load_data_from_excel(
 
     ws = wb[sheet_name]  # открыть указанный лист
 
-    headers_row = next(ws.iter_rows(
+    headers_row = next(ws.iter_rows(  # next - взять первый эл-т итератора (строку заголовков)
             min_row=header_row,
             max_row=header_row,
             min_col=min_col,

@@ -1,6 +1,8 @@
 """
 convertor.py - преобразует значения в колонках к требуемому типу данных.
 """
+from datetime import datetime
+
 
 def convert_int_col_to_string(table: list[dict], col_name: str) -> list[dict]:
     """Преобразует значения в колонке col_name в строку из 2-х символов,
@@ -10,6 +12,8 @@ def convert_int_col_to_string(table: list[dict], col_name: str) -> list[dict]:
 
     table: таблица в виде list[dict]
     col_name: имя колонки, значения в которой нужно конвертировать
+
+    Возвращает таблицу с изменённым столбцом.
     """
     for row in table:
         value = row.get(col_name)
@@ -33,6 +37,8 @@ def divide_mixed_col_float_str(table: list[dict], col_name: str, ending: str) ->
     col_name: имя колонки, которую нужно разделить на две,
     ending: окончание, которое добавить к имени колонки, чтобы сформировать
     новое имя, для колонки со строковыми значениями.
+
+    Возвращает таблицу с изменённым столбцом.
     """
     for row in table:
         value = row.get(col_name)
@@ -54,6 +60,8 @@ def convert_column_to_int(table: list[dict], col_name: str) -> list[dict]:
 
     Выводит в консоль значения из колонки, которые не удалось конвертировать,
     чтобы предотвратить потерю важных данных.
+
+    Возвращает таблицу с изменённым столбцом.
     """
     failed_values = set()
 
@@ -84,13 +92,18 @@ def convert_column_to_string(table: list[dict], col_name: str) -> list[dict]:
 
     Выводит в консоль значения, которые не удалось привести к строке,
     чтобы предотвратить потерю важных данных.
+
+    Возвращает таблицу с изменённым столбцом.
     """
     failed_values = set()
 
     for row in table:
         value = row.get(col_name)
         try:
-            row[col_name] = str(value)
+            if value is None:  # чтобы не превратить None в строку "None"
+                row[col_name] = None
+            else:
+                row[col_name] = str(value)
         except Exception:  # Exception перехват любого исключения
             failed_values.add(value)
             row[col_name] = None
@@ -101,5 +114,35 @@ def convert_column_to_string(table: list[dict], col_name: str) -> list[dict]:
         f'{failed_values}\n'
         f'\nКонец преобразования значений колонок к строкам\n'
         )
+
+    return table
+
+
+def convert_datetime_to_string(table: list[dict], col_name: str) -> list[dict]:
+    """Преобразует объект datetime в строку вида 'ДД.ММ.ГГГГ'.
+
+    table: таблица в виде list[dict]
+    col_name: имя колонки, значения в которой нужно преобразовать.
+
+    Возвращает таблицу с изменённым столбцом.
+    """
+    failed_value = set()
+
+    for row in table:
+        value = row.get(col_name)
+        try:
+            if isinstance(value, datetime):
+                row[col_name] = value.strftime('%d.%m.%Y')  # преобразуем в строку вида 'ДД.ММ.ГГГГ'
+            else:
+                failed_value.add(value)
+                row[col_name] = None
+        except Exception:
+            failed_value.add(value)
+            row[col_name] = None
+
+    print(f'\nПреобразуем значения колонки {col_name} с объектом datetime\n'
+          f'к строке, вида "ДД.ММ.ГГГГ"\n'
+          f'\nНе удалось преобразовать значения:\n'
+          f'{failed_value}')
 
     return table
